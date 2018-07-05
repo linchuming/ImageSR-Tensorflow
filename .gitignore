@@ -1,0 +1,9 @@
+Thumbs.db
+Desktop.ini
+*.pyc
+/output/
+*.png
+*.tfrecords
+*.txt
+/.idea/*
+/__pycache__/
