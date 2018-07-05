@@ -4,7 +4,7 @@ import datetime
 from data_loader import DataLoader
 import os
 
-MODEL = 'VDSR'      # 'VDSR' or 'EDSR'
+MODEL = 'VDSR'                  # 'VDSR' or 'EDSR'
 TRAIN_DIR = 'output/{}/model'.format(MODEL)
 LOG_DIR = 'output/{}/log'.format(MODEL)
 BATCH_SIZE = 64
@@ -16,12 +16,19 @@ LR_VALS = [1e-4, 1e-5]
 SAVE_PER_STEP = 2000
 TRAIN_PNG_PATH = 'DIV2K/DIV2K_train_HR'
 TRAIN_TFRECORD_PATH = 'DIV2K/tfrecords'
-DATA_LOADER_MODE = 'RAW'       # 'TFRECORD' or 'RAW'
+DATA_LOADER_MODE = 'RAW'        # 'TFRECORD' or 'RAW'
+DEVICE_MODE = 'GPU'             # 'CPU' or 'GPU'
+DEVICE_GPU_ID = '0'
 
 if not os.path.exists(TRAIN_DIR):
     os.makedirs(TRAIN_DIR)
 if not os.path.exists(LOG_DIR):
     os.makedirs(LOG_DIR)
+
+if DEVICE_MODE == 'CPU':
+    os.environ['CUDA_VISIBLE_DEVICES'] = '-1'
+else:
+    os.environ['CUDA_VISIBLE_DEVICES'] = DEVICE_GPU_ID
 
 def restore_session_from_checkpoint(sess, saver):
     checkpoint = tf.train.latest_checkpoint(TRAIN_DIR)
