@@ -4,20 +4,20 @@ import datetime
 from data_loader import DataLoader
 import os
 
-MODEL = 'VDSR'                  # 'VDSR' or 'EDSR'
+MODEL = 'VDSR'  # 'VDSR' or 'EDSR'
 TRAIN_DIR = 'output/{}/model'.format(MODEL)
 LOG_DIR = 'output/{}/log'.format(MODEL)
 BATCH_SIZE = 64
-SHUFFLE_NUM = 10000
-PREFETCH_NUM = 5000
-MAX_TRAIN_STEP = 100000
-LR_BOUNDS = [90000]
+SHUFFLE_NUM = 20000
+PREFETCH_NUM = 10000
+MAX_TRAIN_STEP = 50000
+LR_BOUNDS = [45000]
 LR_VALS = [1e-4, 1e-5]
 SAVE_PER_STEP = 2000
 TRAIN_PNG_PATH = 'DIV2K/DIV2K_train_HR'
 TRAIN_TFRECORD_PATH = 'DIV2K/tfrecords'
-DATA_LOADER_MODE = 'RAW'        # 'TFRECORD' or 'RAW'
-DEVICE_MODE = 'GPU'             # 'CPU' or 'GPU'
+DATA_LOADER_MODE = 'RAW'  # 'TFRECORD' or 'RAW'
+DEVICE_MODE = 'GPU'  # 'CPU' or 'GPU'
 DEVICE_GPU_ID = '0'
 
 if not os.path.exists(TRAIN_DIR):
@@ -30,6 +30,7 @@ if DEVICE_MODE == 'CPU':
 else:
     os.environ['CUDA_VISIBLE_DEVICES'] = DEVICE_GPU_ID
 
+
 def restore_session_from_checkpoint(sess, saver):
     checkpoint = tf.train.latest_checkpoint(TRAIN_DIR)
     if checkpoint:
@@ -37,6 +38,7 @@ def restore_session_from_checkpoint(sess, saver):
         return True
     else:
         return False
+
 
 if MODEL == 'VDSR':
     model = VDSR()
@@ -51,14 +53,14 @@ data_loader = DataLoader(data_dir=TRAIN_PNG_PATH,
 if DATA_LOADER_MODE == 'TFRECORD':
     if len(os.listdir(TRAIN_TFRECORD_PATH)) == 0:
         data_loader.gen_tfrecords(TRAIN_TFRECORD_PATH)
-    lrs, gts = data_loader.read_tfrecords(TRAIN_TFRECORD_PATH)
+    lrs, bics, gts = data_loader.read_tfrecords(TRAIN_TFRECORD_PATH)
 else:
-    lrs, gts = data_loader.read_pngs()
+    lrs, bics, gts = data_loader.read_pngs()
 
-res = model(lrs)
+res = model(lrs, bics)
 with tf.name_scope('train'):
     global_step = tf.Variable(0, trainable=False, name='global_step')
-    mse_loss = tf.reduce_mean(tf.square(res - gts)) * 1e3
+    mse_loss = tf.reduce_sum(tf.square(res - gts)) / BATCH_SIZE
     reg_loss = tf.losses.get_regularization_loss()
     loss = mse_loss + reg_loss
 
@@ -74,7 +76,8 @@ with tf.name_scope('summaries'):
     tf.summary.scalar('loss', loss)
 
     tf.summary.image('lr', lrs, 1)
-    tf.summary.image('out', res, 1)
+    tf.summary.image('bic', model.bic, 1)
+    tf.summary.image('out', tf.clip_by_value(res, 0, 1), 1)
     tf.summary.image('gt', gts, 1)
 
     summary_op = tf.summary.merge_all()
@@ -105,10 +108,3 @@ while True:
     if step >= MAX_TRAIN_STEP:
         print('Done train.')
         break
-
-
-
-
-
-
-

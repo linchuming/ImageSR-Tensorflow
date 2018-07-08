@@ -2,7 +2,7 @@
 ### Preparation
 - Python 2.7/3.4/3.5/3.6 (recommend python 3.5/3.6)
 - Tensorflow 1.4+ (utilize tf.data to read training data)
-### Train
+### Training
 - Prepare training dataset. Please download DIV2K dataset:
 [link](http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_HR.zip)
 - Move the training dataset to ./DIV2K/DIV2K_train_HR
@@ -17,5 +17,5 @@ Using our models can achieve the performance as shown in below table data:
 
 |Dataset|Scale|Bicubic|VDSR|EDSR|
 |:-|:-|:-|:-|:-|
-|Set5|x4|0|0|0|
+|Set5|x4-PSNR|28.43|31.43|31.90|
 

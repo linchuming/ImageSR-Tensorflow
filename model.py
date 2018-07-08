@@ -1,5 +1,5 @@
 import tensorflow as tf
-
+from utils import tf_resize_image
 
 def conv2d(x, num_output, kernel_size=3, stride=1, act=tf.nn.relu, name=None):
     return tf.layers.conv2d(x, num_output, kernel_size, stride, 'same',
@@ -17,12 +17,15 @@ class VDSR():
     def __init__(self, scale=4):
         self.scale = scale
 
-    def __call__(self, lr):
+    def __call__(self, lr, bic=None):
         with tf.variable_scope('VDSR', reuse=tf.AUTO_REUSE):
             b, h, w, c = tf.unstack(tf.shape(lr))
             scale = self.scale
             layer_num = 20
-            bic = tf.image.resize_bicubic(lr, [h * scale, w * scale])
+            if bic == None:
+                bic = tf_resize_image(lr, scale)
+                bic = tf.reshape(bic, [b, h * scale, w * scale, 1])
+            self.bic = bic
             x = bic
             for i in range(layer_num - 1):
                 x = conv2d(x, 64)
@@ -42,11 +45,14 @@ class EDSR():
             x = x0 + x * scale
             return x
 
-    def __call__(self, lr):
+    def __call__(self, lr, bic=None):
         with tf.variable_scope('EDSR', reuse=tf.AUTO_REUSE):
             b, h, w, c = tf.unstack(tf.shape(lr))
             scale = self.scale
-            bic = tf.image.resize_bicubic(lr, [h * scale, w * scale])
+            if bic == None:
+                bic = tf_resize_image(lr, scale)
+                bic = tf.reshape(bic, [b, h * scale, w * scale, 1])
+            self.bic = bic
             x = conv2d(lr, 256)
             x0 = x
             for i in range(16):
@@ -55,6 +61,18 @@ class EDSR():
             x = x + x0
             x = deconv2d(x, 1, kernel_size=2 * scale, stride=scale)
             return x + bic
+
+class BICUBIC():
+    def __init__(self, scale=4):
+        self.scale = scale
+
+    def __call__(self, lr):
+        with tf.variable_scope('BICUBIC'):
+            b, h, w, c = tf.unstack(tf.shape(lr))
+            scale = self.scale
+            bic = tf_resize_image(lr, scale)
+            bic = tf.reshape(bic, [b, h * scale, w * scale, c])
+            return bic
 
 
 if __name__ == '__main__':

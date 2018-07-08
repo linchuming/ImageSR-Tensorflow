@@ -2,8 +2,9 @@ Thumbs.db
 Desktop.ini
 *.pyc
 /output/
-*.png
+/DIV2K/DIV2K_train_HR/*.png
 *.tfrecords
 *.txt
 /.idea/*
 /__pycache__/
+*.ckpt*

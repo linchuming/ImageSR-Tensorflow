@@ -1,6 +1,6 @@
 import numpy as np
 from scipy import misc
-
+import tensorflow as tf
 
 def psnr(im1, im2):
     """ im1 and im2 value must be between 0 and 255"""
@@ -39,3 +39,20 @@ def ycbcr2rgb(img):
     img = img - np.array([16, 128, 128])
     img = np.dot(img, ycbcr_to_rgb.T) * 255.0
     return img
+
+
+def tf_resize_image(imgs, scale):
+    def resize_image(imgs, scale):
+        b = imgs.shape[0]
+        c = imgs.shape[-1]
+        res = []
+        for i in range(b):
+            img = imgs[i]
+            tar_img = []
+            for j in range(c):
+                tar_img.append(misc.imresize(img[:, :, j], scale / 1.0, 'bicubic', mode='F'))
+            img = np.stack(tar_img, -1)
+            res.append(img)
+
+        return np.stack(res)
+    return tf.py_func(lambda x: resize_image(x, scale), [imgs], tf.float32)
