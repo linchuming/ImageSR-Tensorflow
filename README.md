@@ -24,7 +24,7 @@ Using our models can achieve the performance as shown in below table data:
 |:-|:-|:-|:-|:-|
 |Set5|x4-PSNR|28.43|31.43|31.90|
 ### x4 SR Visual Result
-<figure>
+<figure class="third">
     <img src="result/Set5/BICUBIC/butterfly_GT.bmp">
     <img src="result/Set5/VDSR/butterfly_GT.bmp">
     <img src="result/Set5/EDSR/butterfly_GT.bmp">
