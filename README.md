@@ -9,7 +9,7 @@
 - Check the config in train.py
 - Run train.py > python train.py
 ### Inference
-We train two models: VDSR and EDSR. Models are trained 50,000 steps with batch size 64.  
+We train two models: VDSR (only x4 scale) and EDSR (small version). Models are trained 50,000 steps with batch size 64.  
 Please download model ckpt files from Cloud:  
 BaiduYun:  
 link：https://pan.baidu.com/s/1eB0jY5cgp7j39M3Gt2ndqw password：4qm4  
