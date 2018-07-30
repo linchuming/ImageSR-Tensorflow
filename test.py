@@ -5,11 +5,12 @@ import os
 import utils
 from scipy import misc
 import numpy as np
+import time
 
 TEST_DIR = 'test_data/Set5'
 MODEL = 'VDSR'  # 'VDSR' or 'EDSR' or 'BICUBIC'
 MODEL_CKPT_PATH = 'model/{}/checkpoint.ckpt-50000'.format(MODEL)
-OUTPUT_DIR = 'result/Set5/{}'.format(MODEL)
+OUTPUT_DIR = 'result/calendar/{}'.format(MODEL)
 DEVICE_MODE = 'GPU'  # 'CPU' or 'GPU'
 DEVICE_GPU_ID = '0'
 SCALE = 4
@@ -23,11 +24,11 @@ if not os.path.exists(OUTPUT_DIR):
     os.makedirs(OUTPUT_DIR)
 
 if MODEL == 'VDSR':
-    model = VDSR()
+    model = VDSR(scale=SCALE)
 elif MODEL == 'EDSR':
-    model = EDSR()
+    model = EDSR(scale=SCALE)
 else:
-    model = BICUBIC()
+    model = BICUBIC(scale=SCALE)
 
 lr = tf.placeholder(tf.float32, [None, None, None, 1])
 res = model(lr)
@@ -48,7 +49,9 @@ for f in fs:
     lr_img = misc.imresize(img, 1.0 / SCALE, 'bicubic')
     lr_y = utils.rgb2ycbcr(lr_img)[:, :, :1]
     lr_y = np.expand_dims(lr_y, 0).astype(np.float32) / 255.0
+    start = time.clock()
     res_y = sess.run(res, feed_dict={lr: lr_y})
+    end = time.clock()
     res_y = np.clip(res_y, 0, 1)[0] * 255.0
     bic_img = misc.imresize(lr_img, SCALE / 1.0, 'bicubic')
 
@@ -61,6 +64,6 @@ for f in fs:
     gt_y = utils.rgb2ycbcr(img)[:, :, :1]
     psnr = utils.psnr(res_y[SCALE:-SCALE, SCALE:-SCALE], gt_y[SCALE:-SCALE, SCALE:-SCALE])
     psnrs.append(psnr)
-    print(img_name, 'PSNR:', psnr)
+    print(img_name, 'PSNR:', psnr, 'time:', end - start)
 
 print('AVG PSNR:', np.mean(psnrs))

@@ -7,6 +7,7 @@ import os
 MODEL = 'VDSR'  # 'VDSR' or 'EDSR'
 TRAIN_DIR = 'output/{}/model'.format(MODEL)
 LOG_DIR = 'output/{}/log'.format(MODEL)
+SCALE = 4
 BATCH_SIZE = 64
 SHUFFLE_NUM = 20000
 PREFETCH_NUM = 10000
@@ -41,14 +42,15 @@ def restore_session_from_checkpoint(sess, saver):
 
 
 if MODEL == 'VDSR':
-    model = VDSR()
+    model = VDSR(scale=SCALE)
 else:
-    model = EDSR()
+    model = EDSR(scale=SCALE)
 
 data_loader = DataLoader(data_dir=TRAIN_PNG_PATH,
                          batch_size=BATCH_SIZE,
                          shuffle_num=SHUFFLE_NUM,
-                         prefetch_num=PREFETCH_NUM)
+                         prefetch_num=PREFETCH_NUM,
+                         scale=SCALE)
 
 if DATA_LOADER_MODE == 'TFRECORD':
     if len(os.listdir(TRAIN_TFRECORD_PATH)) == 0:
