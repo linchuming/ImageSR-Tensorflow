@@ -2,6 +2,10 @@
 [![MIT License](http://img.shields.io/badge/license-MIT-blue.svg?style=flat-square)][license]
 
 [license]: https://github.com/linchuming/ImageSR-Tensorflow/blob/master/LICENSE
+
+### Update
+- 2019.11.25: We release Pytorch version for ImageSR [ImageSR-Pytorch](https://github.com/linchuming/ImageSR-Pytorch)
+
 ### Preparation
 - Python 2.7/3.4/3.5/3.6 (recommend python 3.5/3.6)
 - Tensorflow 1.4+ (utilize tf.data to read training data)
